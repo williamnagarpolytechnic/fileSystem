@@ -100,9 +100,7 @@
     const loginContainer = document.getElementById('login-container');
     const appFrame = document.getElementById('app-frame');
 
-    // !!! IMPORTANT !!!
-    // Replace this with your Google Apps Script web app URL
-    const appScriptUrl = 'YOUR_APPS_SCRIPT_URL';
+    const appScriptUrl = 'https://script.google.com/macros/s/AKfycbyzLuDkFrcMQqp3pjRTOFH24jQT9kIhHNph6eQSgb2iLUnuL-U9m7ak3yfZbTdf-nEN/exec';
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -125,12 +123,11 @@
           })
         });
 
-        const result = await response.json();
-        const data = JSON.parse(result);
+        const data = await response.json();
 
         if (data.success) {
           loginContainer.style.display = 'none';
-          appFrame.src = data.url;
+          appFrame.src = data.url + '?username=' + username + '&password=' + password;
           appFrame.style.display = 'block';
         } else {
           errorMessage.textContent = data.message;
