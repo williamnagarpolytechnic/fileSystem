@@ -104,6 +104,28 @@
     // Replace this with your Google Apps Script web app URL
     const appScriptUrl = 'https://script.google.com/macros/s/AKfycbyc1HJgOta4sjlFJP0Zyu1puPLdc3izc_sSOb0HGdFPTnO4MFg9La1_g53TcWGKeahk/exec';
 
+    function xhr(url, data) {
+      return new Promise((resolve, reject) => {
+        const xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+              try {
+                resolve(JSON.parse(xmlhttp.responseText));
+              } catch (e) {
+                reject(new Error("Invalid JSON response"));
+              }
+            } else {
+                reject(new Error(`HTTP error! status: ${xmlhttp.status}`));
+            }
+          }
+        };
+        xmlhttp.open('POST', url, true);
+        xmlhttp.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+        xmlhttp.send(JSON.stringify(data));
+      });
+    }
+
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -114,18 +136,10 @@
       errorMessage.style.display = 'none';
 
       try {
-        const response = await fetch(appScriptUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: JSON.stringify({
-            'username': username,
-            'password': password
-          })
+        const data = await xhr(appScriptUrl, {
+          username,
+          password
         });
-
-        const data = await response.json();
 
         if (data.success) {
           loginContainer.style.display = 'none';
