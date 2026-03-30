@@ -110,11 +110,7 @@
         xmlhttp.onreadystatechange = function() {
           if (xmlhttp.readyState == 4) {
             if (xmlhttp.status == 200) {
-              try {
-                resolve(JSON.parse(xmlhttp.responseText));
-              } catch (e) {
-                reject(new Error("Invalid JSON response"));
-              }
+              resolve(xmlhttp.responseText);
             } else {
                 reject(new Error(`HTTP error! status: ${xmlhttp.status}`));
             }
@@ -136,22 +132,16 @@
       errorMessage.style.display = 'none';
 
       try {
-        const data = await xhr(appScriptUrl, {
+        const responseText = await xhr(appScriptUrl, {
           username,
           password
         });
+        errorMessage.textContent = responseText;
+        errorMessage.style.display = 'block';
 
-        if (data.success) {
-          loginContainer.style.display = 'none';
-          appFrame.src = data.url + '?username=' + username + '&password=' + password;
-          appFrame.style.display = 'block';
-        } else {
-          errorMessage.textContent = data.message;
-          errorMessage.style.display = 'block';
-        }
       } catch (error) {
         console.error('Error:', error);
-        errorMessage.textContent = 'An error occurred during login.';
+        errorMessage.textContent = 'An error occurred during login: ' + error.message;
         errorMessage.style.display = 'block';
       } finally {
         spinner.style.display = 'none';
