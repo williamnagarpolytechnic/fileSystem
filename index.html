@@ -125,7 +125,7 @@
       .then(data => {
         if (data.success) {
           loginContainer.style.display = 'none';
-          appFrame.src = data.url;
+          appFrame.src = data.url + '?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
           appFrame.style.display = 'block';
         } else {
           errorMessage.textContent = data.message;
