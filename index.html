@@ -104,29 +104,8 @@
     // Replace this with your Google Apps Script web app URL
     const appScriptUrl = 'https://script.google.com/macros/s/AKfycbyc1HJgOta4sjlFJP0Zyu1puPLdc3izc_sSOb0HGdFPTnO4MFg9La1_g53TcWGKeahk/exec';
 
-    function xhr(url, data) {
-      return new Promise((resolve, reject) => {
-        const xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == 4) {
-            if (xmlhttp.status == 200) {
-              try {
-                resolve(JSON.parse(xmlhttp.responseText));
-              } catch (e) {
-                reject(new Error("Invalid JSON response"));
-              }
-            } else {
-                reject(new Error(`HTTP error! status: ${xmlhttp.status}`));
-            }
-          }
-        };
-        xmlhttp.open('POST', url, true);
-        xmlhttp.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
-        xmlhttp.send(JSON.stringify(data));
-      });
-    }
-
-    loginForm.addEventListener('submit', async (e) => {
+    
+    loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
       const username = loginForm.username.value;
@@ -135,27 +114,32 @@
       spinner.style.display = 'block';
       errorMessage.style.display = 'none';
 
-      try {
-        const data = await xhr(appScriptUrl, {
-          username,
-          password
-        });
-
+      fetch(appScriptUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify({username, password}),
+      })
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
           loginContainer.style.display = 'none';
-          appFrame.src = data.url + '?username=' + username + '&password=' + password;
+          appFrame.src = data.url;
           appFrame.style.display = 'block';
         } else {
           errorMessage.textContent = data.message;
           errorMessage.style.display = 'block';
         }
-      } catch (error) {
+      })
+      .catch(error => {
         console.error('Error:', error);
         errorMessage.textContent = 'An error occurred during login.';
         errorMessage.style.display = 'block';
-      } finally {
+      })
+      .finally(() => {
         spinner.style.display = 'none';
-      }
+      });
     });
   </script>
 
