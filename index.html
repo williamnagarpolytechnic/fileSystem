@@ -123,11 +123,12 @@
       })
       .then(response => response.json())
       .then(data => {
-        if (data.success) {
-          // On success, the server has created a session.
-          // We just need to load the base URL in the iframe.
+        if (data.success && data.token) {
+          // On success, the server has sent back a session token.
+          // We use this token to construct the app URL.
           loginContainer.style.display = 'none';
-          appFrame.src = data.url; // No credentials needed in URL
+          const appUrl = appScriptUrl + '?token=' + data.token;
+          appFrame.src = appUrl;
           appFrame.style.display = 'block';
         } else {
           errorMessage.textContent = data.message || 'Invalid username or password.';
