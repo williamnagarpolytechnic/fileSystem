@@ -110,9 +110,16 @@
     // Replace this with your Google Apps Script web app URL
     const appScriptUrl = 'https://script.google.com/macros/s/AKfycbyc1HJgOta4sjlFJP0Zyu1puPLdc3izc_sSOb0HGdFPTnO4MFg9La1_g53TcWGKeahk/exec';
 
-    // Hide the spinner only when the iframe has completely finished loading
-    appFrame.addEventListener('load', () => {
-      spinner.style.display = 'none';
+    // Listen for a message from the iframe to know when it's truly finished loading
+    window.addEventListener('message', (event) => {
+      // Security best practice: Check the origin of the message
+      if (event.origin !== new URL(appScriptUrl).origin) {
+        return;
+      }
+      // Check for our specific "app loaded" message
+      if (event.data && event.data.appLoaded === true) {
+        spinner.style.display = 'none';
+      }
     });
     
     loginForm.addEventListener('submit', (e) => {
@@ -135,7 +142,7 @@
       .then(data => {
         if (data.success && data.token) {
           // On success, hide the login form and start loading the app.
-          // The spinner will be hidden by the iframe's 'load' event listener.
+          // The spinner will now be hidden by the 'message' event listener.
           loginContainer.style.display = 'none';
           const appUrl = appScriptUrl + '?token=' + data.token;
           appFrame.src = appUrl;
